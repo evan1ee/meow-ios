@@ -1292,6 +1292,48 @@ rules:
         };
         assert_eq!(rc, 0, "FFI validate must succeed on rule-providers YAML");
     }
+
+    #[test]
+    fn validate_accepts_system_nameservers_and_udp_over_tcp() {
+        use std::ffi::CString;
+        let yaml = r#"
+mixed-port: 7890
+dns:
+  enable: true
+  default-nameserver:
+    - dhcp://system
+  nameserver:
+    - system
+    - 223.5.5.5
+proxies:
+  - name: ss-uot
+    type: ss
+    server: 1.2.3.4
+    port: 8388
+    cipher: aes-128-gcm
+    password: secret
+    udp: true
+    udp-over-tcp: true
+  - name: ss-shadowtls-v3
+    type: ss
+    server: 1.2.3.4
+    port: 8443
+    cipher: chacha20-ietf-poly1305
+    password: secret
+    plugin: shadow-tls
+    plugin-opts:
+      host: cover.example.com
+      password: stls-password
+      version: 3
+rules:
+  - MATCH,ss-uot
+"#;
+        let cstr = CString::new(yaml).unwrap();
+        let rc = unsafe {
+            crate::meow_engine_validate_config(cstr.as_ptr(), yaml.len() as std::os::raw::c_int)
+        };
+        assert_eq!(rc, 0, "FFI validate must accept system nameserver, udp-over-tcp, and shadowtls v3");
+    }
 }
 
 #[cfg(test)]

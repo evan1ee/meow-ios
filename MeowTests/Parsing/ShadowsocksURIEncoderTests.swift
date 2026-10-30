@@ -137,6 +137,23 @@ struct ShadowsocksURIEncoderTests {
     }
 
     @Test
+    func `round-trips shadow-tls plugin with version 3`() throws {
+        try expectRoundTrips(ShadowsocksServer(
+            name: "stls",
+            server: "198.51.100.1",
+            port: 8443,
+            cipher: "aes-256-gcm",
+            password: "pw",
+            plugin: ShadowsocksServer.shadowTLSPlugin,
+            pluginOpts: [
+                .init("host", "gateway.icloud.com"),
+                .init("password", "stls-pw"),
+                .init("version", "3"),
+            ],
+        ))
+    }
+
+    @Test
     func `percent-encodes non-ASCII names`() throws {
         let server = ShadowsocksServer(
             name: "香港 01",

@@ -19,6 +19,7 @@ struct AddShadowsocksSheet: View {
     @State private var cipher = ShadowsocksServer.defaultCipher
     @State private var password = ""
     @State private var udp = false
+    @State private var udpOverTcp = false
 
     @State private var pluginChoice: PluginChoice = .none
 
@@ -39,6 +40,11 @@ struct AddShadowsocksSheet: View {
     @State private var v2rayPath = ""
     @State private var v2rayMux = false
 
+    // shadow-tls fields.
+    @State private var shadowTLSHost = ""
+    @State private var shadowTLSPassword = ""
+    @State private var shadowTLSVersion = 2
+
     /// Plugin parsed from a link that the form has no dedicated fields for.
     /// Preserved verbatim so scanning an arbitrary SIP002 QR code doesn't
     /// silently drop its options; picking any explicit plugin replaces it.
@@ -51,6 +57,7 @@ struct AddShadowsocksSheet: View {
         case ech
         case obfs
         case v2ray
+        case shadowTLS
 
         var id: String {
             rawValue
@@ -62,6 +69,7 @@ struct AddShadowsocksSheet: View {
             case .ech: "ssAdd.plugin.ech"
             case .obfs: "ssAdd.plugin.obfs"
             case .v2ray: "ssAdd.plugin.v2ray"
+            case .shadowTLS: "ssAdd.plugin.shadowTLS"
             }
         }
     }
@@ -123,6 +131,7 @@ struct AddShadowsocksSheet: View {
         cipher = parsed.cipher
         password = parsed.password
         udp = parsed.udp
+        udpOverTcp = parsed.udpOverTcp ?? false
         passthroughPlugin = nil
         switch parsed.plugin {
         case ShadowsocksServer.echTLSPlugin:
@@ -142,6 +151,11 @@ struct AddShadowsocksSheet: View {
             v2rayHost = parsed.pluginOption("host") ?? ""
             v2rayPath = parsed.pluginOption("path") ?? ""
             v2rayMux = parsed.pluginOption("mux") == "true"
+        case ShadowsocksServer.shadowTLSPlugin:
+            pluginChoice = .shadowTLS
+            shadowTLSHost = parsed.pluginOption("host") ?? ""
+            shadowTLSPassword = parsed.pluginOption("password") ?? ""
+            shadowTLSVersion = Int(parsed.pluginOption("version") ?? "") ?? 2
         case let .some(other):
             pluginChoice = .none
             passthroughPlugin = PassthroughPlugin(name: other, opts: parsed.pluginOpts)
@@ -169,6 +183,7 @@ struct AddShadowsocksSheet: View {
             cipher: cipher,
             password: password,
             udp: udp,
+            udpOverTcp: udpOverTcp ? true : nil,
             plugin: plugin,
             pluginOpts: opts,
         )
@@ -184,7 +199,23 @@ struct AddShadowsocksSheet: View {
             (ShadowsocksServer.obfsPlugin, obfsOpts())
         case .v2ray:
             (ShadowsocksServer.v2rayPlugin, v2rayOpts())
+        case .shadowTLS:
+            (ShadowsocksServer.shadowTLSPlugin, shadowTLSOpts())
         }
+    }
+
+    private func shadowTLSOpts() -> [ShadowsocksServer.PluginOption] {
+        var opts: [ShadowsocksServer.PluginOption] = []
+        let hostValue = shadowTLSHost.trimmingCharacters(in: .whitespaces)
+        if !hostValue.isEmpty {
+            opts.append(.init("host", hostValue))
+        }
+        let passwordValue = shadowTLSPassword.trimmingCharacters(in: .whitespaces)
+        if !passwordValue.isEmpty {
+            opts.append(.init("password", passwordValue))
+        }
+        opts.append(.init("version", String(shadowTLSVersion)))
+        return opts
     }
 
     private func echOpts(host: String) -> [ShadowsocksServer.PluginOption] {
@@ -312,6 +343,8 @@ extension AddShadowsocksSheet {
                 .accessibilityIdentifier("ssAdd.passwordField")
             Toggle("ssAdd.toggle.udp", isOn: $udp)
                 .accessibilityIdentifier("ssAdd.udpToggle")
+            Toggle("ssAdd.toggle.udpOverTcp", isOn: $udpOverTcp)
+                .accessibilityIdentifier("ssAdd.udpOverTcpToggle")
         } header: {
             Text("ssAdd.section.server")
         } footer: {
@@ -341,6 +374,8 @@ extension AddShadowsocksSheet {
                 obfsFields
             case .v2ray:
                 v2rayFields
+            case .shadowTLS:
+                shadowTLSFields
             }
         } header: {
             Text("ssAdd.section.plugin")
@@ -361,6 +396,8 @@ extension AddShadowsocksSheet {
         case .obfs, .v2ray:
             // Empty host falls back to the server address in the engine.
             Text("ssAdd.plugin.hostFallback.footer")
+        case .shadowTLS:
+            Text("ssAdd.shadowTLS.footer")
         }
     }
 
@@ -416,5 +453,23 @@ extension AddShadowsocksSheet {
             .accessibilityIdentifier("ssAdd.v2rayPathField")
         Toggle("ssAdd.toggle.v2rayMux", isOn: $v2rayMux)
             .accessibilityIdentifier("ssAdd.v2rayMuxToggle")
+    }
+
+    @ViewBuilder
+    private var shadowTLSFields: some View {
+        TextField("ssAdd.field.shadowTLSHost", text: $shadowTLSHost)
+            .keyboardType(.URL)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .accessibilityIdentifier("ssAdd.shadowTLSHostField")
+        SecureField("ssAdd.field.shadowTLSPassword", text: $shadowTLSPassword)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .accessibilityIdentifier("ssAdd.shadowTLSPasswordField")
+        Picker("ssAdd.field.shadowTLSVersion", selection: $shadowTLSVersion) {
+            Text(verbatim: "v2").tag(2)
+            Text(verbatim: "v3").tag(3)
+        }
+        .accessibilityIdentifier("ssAdd.shadowTLSVersionPicker")
     }
 }

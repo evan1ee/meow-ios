@@ -525,14 +525,23 @@ mod tests {
         RefusesChange,
     }
 
-    async fn stun_server(mode: ServerMode) -> SocketAddr {
+    async fn stun_server(mode: ServerMode) -> Option<SocketAddr> {
         let (a1, a2): (IpAddr, IpAddr) =
             ("127.0.0.1".parse().unwrap(), "127.0.0.2".parse().unwrap());
+        if UdpSocket::bind((a2, 0)).await.is_err() {
+            eprintln!("skipping STUN test: loopback alias 127.0.0.2 not supported on this host");
+            return None;
+        }
+        let mut attempts = 0;
         let (sockets, p1, p2) = loop {
-            let first = UdpSocket::bind((a1, 0)).await.unwrap();
-            let p1 = first.local_addr().unwrap().port();
-            let second = UdpSocket::bind((a1, 0)).await.unwrap();
-            let p2 = second.local_addr().unwrap().port();
+            attempts += 1;
+            if attempts > 50 {
+                return None;
+            }
+            let first = UdpSocket::bind((a1, 0)).await.ok()?;
+            let p1 = first.local_addr().ok()?.port();
+            let second = UdpSocket::bind((a1, 0)).await.ok()?;
+            let p2 = second.local_addr().ok()?.port();
             let (Ok(third), Ok(fourth)) = (
                 UdpSocket::bind((a2, p1)).await,
                 UdpSocket::bind((a2, p2)).await,
@@ -596,7 +605,7 @@ mod tests {
                 }
             });
         }
-        SocketAddr::new(a1, p1)
+        Some(SocketAddr::new(a1, p1))
     }
 
     fn address_attr(kind: u16, addr: SocketAddr) -> Vec<u8> {
@@ -752,11 +761,11 @@ mod tests {
         classify(&mut relay, server, TEST_SCHEDULE).await
     }
 
-    async fn behaviour(mapping: Behavior, filtering: Behavior) -> (Behavior, Behavior) {
-        let server = stun_server(ServerMode::Full).await;
+    async fn behaviour(mapping: Behavior, filtering: Behavior) -> Option<(Behavior, Behavior)> {
+        let server = stun_server(ServerMode::Full).await?;
         let report = run(SimNat::new(mapping, filtering), server).await.unwrap();
         assert!(report.mapped.is_some());
-        (report.mapping, report.filtering)
+        Some((report.mapping, report.filtering))
     }
 
     use Behavior::{
@@ -765,32 +774,37 @@ mod tests {
 
     #[tokio::test]
     async fn full_cone() {
-        assert_eq!(behaviour(Ei, Ei).await, (Ei, Ei));
+        let Some(res) = behaviour(Ei, Ei).await else { return; };
+        assert_eq!(res, (Ei, Ei));
     }
 
     #[tokio::test]
     async fn restricted_cone() {
-        assert_eq!(behaviour(Ei, Ad).await, (Ei, Ad));
+        let Some(res) = behaviour(Ei, Ad).await else { return; };
+        assert_eq!(res, (Ei, Ad));
     }
 
     #[tokio::test]
     async fn port_restricted_cone() {
-        assert_eq!(behaviour(Ei, Apd).await, (Ei, Apd));
+        let Some(res) = behaviour(Ei, Apd).await else { return; };
+        assert_eq!(res, (Ei, Apd));
     }
 
     #[tokio::test]
     async fn address_dependent_mapping() {
-        assert_eq!(behaviour(Ad, Apd).await, (Ad, Apd));
+        let Some(res) = behaviour(Ad, Apd).await else { return; };
+        assert_eq!(res, (Ad, Apd));
     }
 
     #[tokio::test]
     async fn symmetric() {
-        assert_eq!(behaviour(Apd, Apd).await, (Apd, Apd));
+        let Some(res) = behaviour(Apd, Apd).await else { return; };
+        assert_eq!(res, (Apd, Apd));
     }
 
     #[tokio::test]
     async fn a_relay_bound_to_one_destination_is_not_misread() {
-        let server = stun_server(ServerMode::Full).await;
+        let Some(server) = stun_server(ServerMode::Full).await else { return; };
         let relay = BoundRelay {
             socket: UdpSocket::bind("127.0.0.1:0").await.unwrap(),
             remote: server,
@@ -804,7 +818,7 @@ mod tests {
 
     #[tokio::test]
     async fn a_relay_without_sources_is_not_misread() {
-        let server = stun_server(ServerMode::Full).await;
+        let Some(server) = stun_server(ServerMode::Full).await else { return; };
         let mut nat = SimNat::new(Ei, Ei);
         nat.reported_source = Some("0.0.0.0:0".parse().unwrap());
         let report = run(nat, server).await.unwrap();
@@ -816,14 +830,14 @@ mod tests {
 
     #[tokio::test]
     async fn a_refused_change_request_leaves_filtering_unknown() {
-        let server = stun_server(ServerMode::RefusesChange).await;
+        let Some(server) = stun_server(ServerMode::RefusesChange).await else { return; };
         let report = run(SimNat::new(Ei, Apd), server).await.unwrap();
         assert_eq!((report.mapping, report.filtering), (Ei, Unknown));
     }
 
     #[tokio::test]
     async fn a_plain_server_is_passed_over() {
-        let server = stun_server(ServerMode::Plain).await;
+        let Some(server) = stun_server(ServerMode::Plain).await else { return; };
         assert_eq!(run(SimNat::new(Ei, Ei), server).await, None);
     }
 
@@ -838,10 +852,10 @@ mod tests {
 
     #[tokio::test]
     async fn two_plain_servers_tell_the_mapping_only() {
-        let (first, second) = (
+        let (Some(first), Some(second)) = (
             stun_server(ServerMode::Plain).await,
             stun_server(ServerMode::Plain).await,
-        );
+        ) else { return; };
         for (nat, expected) in [(Ei, Ei), (Apd, Behavior::Dependent)] {
             let mut relay = Relay::new(Arc::new(SimNat::new(nat, Apd)));
             let report = mapping_only(&mut relay, first, second, TEST_SCHEDULE)

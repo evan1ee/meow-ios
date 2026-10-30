@@ -1937,7 +1937,7 @@ dependencies = [
 [[package]]
 name = "meow-anytls"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1960,7 +1960,7 @@ dependencies = [
 [[package]]
 name = "meow-api"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "anyhow",
  "axum",
@@ -1995,7 +1995,7 @@ dependencies = [
 [[package]]
 name = "meow-common"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2020,7 +2020,7 @@ dependencies = [
 [[package]]
 name = "meow-config"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2050,7 +2050,7 @@ dependencies = [
 [[package]]
 name = "meow-dns"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "async-trait",
  "dashmap 6.2.1",
@@ -2113,7 +2113,7 @@ dependencies = [
 [[package]]
 name = "meow-listener"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "base64 0.22.1",
  "libc",
@@ -2130,7 +2130,7 @@ dependencies = [
 [[package]]
 name = "meow-lwip"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "bindgen",
  "bytes",
@@ -2145,7 +2145,7 @@ dependencies = [
 [[package]]
 name = "meow-proxy"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "aes 0.8.4",
  "argon2",
@@ -2191,7 +2191,7 @@ dependencies = [
 [[package]]
 name = "meow-rules"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "ipnet",
  "maxminddb",
@@ -2207,7 +2207,7 @@ dependencies = [
 [[package]]
 name = "meow-transport"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "aes 0.9.3",
  "aes-gcm 0.10.3",
@@ -2253,12 +2253,12 @@ dependencies = [
 [[package]]
 name = "meow-trie"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 
 [[package]]
 name = "meow-tunnel"
 version = "0.26.1"
-source = "git+https://github.com/meow-rs/meow-rs?rev=fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6#fa7a7d6dc94e886ae0bc43eeb0227082ae5bf2e6"
+source = "git+https://github.com/evan1ee/meow-rs?branch=main#7a60ba36ef60cd9ddd19a58709a8b13e39025221"
 dependencies = [
  "async-trait",
  "dashmap 6.2.1",

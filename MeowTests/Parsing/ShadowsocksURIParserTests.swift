@@ -98,6 +98,20 @@ struct ShadowsocksURIParserTests {
     }
 
     @Test
+    func `parses shadow-tls plugin with host, password, and version`() throws {
+        var comps = URLComponents(string: "ss://\(base64("aes-256-gcm:pw"))@198.51.100.1:8443")!
+        let plugin = "shadow-tls;host=gateway.icloud.com;password=stls-pw;version=3"
+        comps.queryItems = [URLQueryItem(name: "plugin", value: plugin)]
+        comps.fragment = "stls-node"
+        let server = try ShadowsocksURIParser.parse(comps.string!)
+        #expect(server.name == "stls-node")
+        #expect(server.plugin == "shadow-tls")
+        #expect(server.pluginOption("host") == "gateway.icloud.com")
+        #expect(server.pluginOption("password") == "stls-pw")
+        #expect(server.pluginOption("version") == "3")
+    }
+
+    @Test
     func `parses legacy whole-body base64 form`() throws {
         let uri = "ss://\(base64("aes-256-gcm:p@ss:word@1.2.3.4:8388"))#Legacy%20Node"
         let server = try ShadowsocksURIParser.parse(uri)

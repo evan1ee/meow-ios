@@ -255,8 +255,10 @@ enum ShadowsocksConfigBuilder {
                     guard let keyText = key.string else { continue }
                     if let flag = value.bool {
                         opts.append(.init(keyText, flag ? "true" : "false"))
+                    } else if let intVal = value.int {
+                        opts.append(.init(keyText, String(intVal)))
                     } else {
-                        opts.append(.init(keyText, value.string ?? ""))
+                        opts.append(.init(keyText, value.string ?? value.scalar?.string ?? ""))
                     }
                 }
             }
@@ -267,6 +269,7 @@ enum ShadowsocksConfigBuilder {
                 cipher: cipher,
                 password: password,
                 udp: node["udp"]?.bool ?? false,
+                udpOverTcp: node["udp-over-tcp"]?.bool,
                 plugin: node["plugin"]?.string,
                 pluginOpts: opts,
             ))
@@ -286,13 +289,20 @@ enum ShadowsocksConfigBuilder {
             ("password", quoted(server.password)),
             ("udp", boolNode(server.udp)),
         ]
+        if let udpOverTcp = server.udpOverTcp {
+            pairs.append(("udp-over-tcp", boolNode(udpOverTcp)))
+        }
         if let plugin = server.plugin, !plugin.isEmpty {
             pairs.append(("plugin", Node(plugin)))
             if !server.pluginOpts.isEmpty {
                 let optPairs: [(Node, Node)] = server.pluginOpts.map { opt in
-                    let value: Node = (opt.value == "true" || opt.value == "false")
-                        ? boolNode(opt.value == "true")
-                        : quoted(opt.value)
+                    let value: Node = if opt.key == "version", let v = Int(opt.value) {
+                        Node(String(v), Tag(.int))
+                    } else if opt.value == "true" || opt.value == "false" {
+                        boolNode(opt.value == "true")
+                    } else {
+                        quoted(opt.value)
+                    }
                     return (Node(opt.key), value)
                 }
                 pairs.append(("plugin-opts", Node(optPairs)))

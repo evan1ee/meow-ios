@@ -22,6 +22,7 @@ struct ShadowsocksServer: Equatable {
     var cipher: String
     var password: String
     var udp: Bool
+    var udpOverTcp: Bool?
     var plugin: String?
     var pluginOpts: [PluginOption]
 
@@ -32,6 +33,7 @@ struct ShadowsocksServer: Equatable {
         cipher: String,
         password: String,
         udp: Bool = false,
+        udpOverTcp: Bool? = nil,
         plugin: String? = nil,
         pluginOpts: [PluginOption] = [],
     ) {
@@ -41,6 +43,7 @@ struct ShadowsocksServer: Equatable {
         self.cipher = cipher
         self.password = password
         self.udp = udp
+        self.udpOverTcp = udpOverTcp
         self.plugin = plugin
         self.pluginOpts = pluginOpts
     }
@@ -81,4 +84,7 @@ extension ShadowsocksServer {
 
     /// Plugin name of the engine's built-in v2ray-plugin websocket transport.
     static let v2rayPlugin = "v2ray-plugin"
+
+    /// Plugin name of the engine's built-in shadow-tls protocol wrapper.
+    static let shadowTLSPlugin = "shadow-tls"
 }

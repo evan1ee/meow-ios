@@ -195,6 +195,12 @@
 "ssAdd.field.cipher" = "روش رمزنگاری";
 "ssAdd.field.password" = "رمز عبور";
 "ssAdd.toggle.udp" = "UDP";
+"ssAdd.toggle.udpOverTcp" = "UDP over TCP";
+"ssAdd.plugin.shadowTLS" = "shadow-tls";
+"ssAdd.shadowTLS.footer" = "ShadowTLS v2 / v3 protocol wrapper built into the engine.";
+"ssAdd.field.shadowTLSHost" = "Host";
+"ssAdd.field.shadowTLSPassword" = "Password";
+"ssAdd.field.shadowTLSVersion" = "Version";
 "ssAdd.section.plugin" = "افزونه";
 "ssAdd.plugin.picker" = "افزونه";
 "ssAdd.plugin.none" = "هیچ";

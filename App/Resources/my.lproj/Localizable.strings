@@ -189,6 +189,12 @@
 "ssAdd.field.cipher" = "ကုဒ်ဝှက်နည်း";
 "ssAdd.field.password" = "စကားဝှက်";
 "ssAdd.toggle.udp" = "UDP";
+"ssAdd.toggle.udpOverTcp" = "UDP over TCP";
+"ssAdd.plugin.shadowTLS" = "shadow-tls";
+"ssAdd.shadowTLS.footer" = "ShadowTLS v2 / v3 protocol wrapper built into the engine.";
+"ssAdd.field.shadowTLSHost" = "Host";
+"ssAdd.field.shadowTLSPassword" = "Password";
+"ssAdd.field.shadowTLSVersion" = "Version";
 "ssAdd.section.plugin" = "ပလပ်အင်";
 "ssAdd.plugin.picker" = "ပလပ်အင်";
 "ssAdd.plugin.none" = "မရှိ";

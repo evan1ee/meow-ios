@@ -43,6 +43,7 @@ enum ClashConfigLinter {
         "sniffing", "force-dns-mapping",
         "parse-pure-ip", "override-destination",
         "skip-cert-verify", "udp", "tls", "xudp",
+        "udp-over-tcp",
     ]
 
     private static let knownIntKeys: Set<String> = [

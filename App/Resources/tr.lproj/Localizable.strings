@@ -193,6 +193,12 @@
 "ssAdd.field.cipher" = "Şifreleme";
 "ssAdd.field.password" = "Parola";
 "ssAdd.toggle.udp" = "UDP";
+"ssAdd.toggle.udpOverTcp" = "UDP over TCP";
+"ssAdd.plugin.shadowTLS" = "shadow-tls";
+"ssAdd.shadowTLS.footer" = "ShadowTLS v2 / v3 protocol wrapper built into the engine.";
+"ssAdd.field.shadowTLSHost" = "Host";
+"ssAdd.field.shadowTLSPassword" = "Password";
+"ssAdd.field.shadowTLSVersion" = "Version";
 "ssAdd.section.plugin" = "Eklenti";
 "ssAdd.plugin.picker" = "Eklenti";
 "ssAdd.plugin.none" = "Yok";

@@ -1085,11 +1085,16 @@ fn inject_global_selector(root: &mut serde_yaml::Mapping, primary: &str) {
     }
 }
 
-/// Whether a DNS server entry is a mihomo DHCP resolver (`dhcp://en0`,
-/// `dhcp://system`).
+/// Whether a DNS server entry is a mihomo DHCP resolver (`dhcp://en0`).
+/// `system` and `dhcp://system` are valid nameserver tokens in meow-rs and are preserved.
 fn is_dhcp_nameserver(entry: &serde_yaml::Value) -> bool {
     entry.as_str().is_some_and(|address| {
-        url::Url::parse(address.trim()).is_ok_and(|url| url.scheme() == "dhcp")
+        let trimmed = address.trim();
+        let head = trimmed.split_once('#').map(|(h, _)| h).unwrap_or(trimmed);
+        if head.eq_ignore_ascii_case("system") || head.eq_ignore_ascii_case("dhcp://system") {
+            return false;
+        }
+        url::Url::parse(trimmed).is_ok_and(|url| url.scheme() == "dhcp")
     })
 }
 
@@ -2006,10 +2011,15 @@ rules:
             ["223.5.5.5", "119.29.29.29"]
         );
 
-        // DHCP resolvers are unsupported on iOS regardless of their target.
+        // Interface-specific DHCP resolvers (e.g. dhcp://en0) are unsupported on iOS,
+        // but system and dhcp://system are preserved.
         assert_eq!(
             nameservers("dns:\n  nameserver:\n    - dhcp://en0\nrules:\n  - MATCH,DIRECT\n"),
             ["119.29.29.29", "223.5.5.5"]
+        );
+        assert_eq!(
+            nameservers("dns:\n  nameserver:\n    - system\nrules:\n  - MATCH,DIRECT\n"),
+            ["system", "119.29.29.29", "223.5.5.5"]
         );
         assert_eq!(
             nameservers(
@@ -2026,6 +2036,7 @@ rules:
             ),
             [
                 "1.1.1.1",
+                "dhcp://system",
                 "https://dns.google/dns-query",
                 "119.29.29.29",
                 "223.5.5.5"
@@ -2042,7 +2053,7 @@ dns:
     - dhcp://en0
     - 223.5.5.5
   fallback:
-    - dhcp://system
+    - dhcp://en0
     - tls://1.1.1.1
   proxy-server-nameserver:
     - DHCP://en0

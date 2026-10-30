@@ -157,4 +157,82 @@ struct ShadowsocksConfigBuilderTests {
         #expect(opts["mux"] as? Bool == true)
         #expect(ShadowsocksConfigBuilder.extractServers(from: yaml) == [obfsServer, v2rayServer])
     }
+
+    @Test(.tags(.ffi))
+    func `shadowTLS and udp-over-tcp servers render, round-trip, and pass engine validation`() throws {
+        let shadowTLSServerV3 = ShadowsocksServer(
+            name: "shadowtls-v3-node",
+            server: "198.51.100.1",
+            port: 8443,
+            cipher: "aes-256-gcm",
+            password: "ss-password",
+            udp: true,
+            udpOverTcp: true,
+            plugin: ShadowsocksServer.shadowTLSPlugin,
+            pluginOpts: [
+                .init("host", "gateway.icloud.com"),
+                .init("password", "stls-password"),
+                .init("version", "3"),
+            ],
+        )
+        let shadowTLSServerV2 = ShadowsocksServer(
+            name: "shadowtls-v2-node",
+            server: "198.51.100.2",
+            port: 8443,
+            cipher: "chacha20-ietf-poly1305",
+            password: "ss-password",
+            udp: false,
+            udpOverTcp: false,
+            plugin: ShadowsocksServer.shadowTLSPlugin,
+            pluginOpts: [
+                .init("host", "gateway.icloud.com"),
+                .init("password", "stls-password"),
+                .init("version", "2"),
+            ],
+        )
+        let yaml = try ShadowsocksConfigBuilder.render(servers: [shadowTLSServerV3, shadowTLSServerV2])
+        try MeowConfigValidator.validate(yaml)
+
+        let diagnostics = ClashConfigLinter.lint(yaml)
+        #expect(diagnostics.isEmpty, "unexpected lint issues: \(diagnostics)")
+
+        let root = try #require(try Yams.load(yaml: yaml) as? [String: Any])
+        let proxies = try #require(root["proxies"] as? [[String: Any]])
+        let v3 = try #require(proxies.first { $0["name"] as? String == "shadowtls-v3-node" })
+        #expect(v3["udp-over-tcp"] as? Bool == true)
+        let v3Opts = try #require(v3["plugin-opts"] as? [String: Any])
+        #expect(v3Opts["version"] as? Int == 3)
+        #expect(v3Opts["host"] as? String == "gateway.icloud.com")
+
+        let v2 = try #require(proxies.first { $0["name"] as? String == "shadowtls-v2-node" })
+        #expect(v2["udp-over-tcp"] as? Bool == false)
+        let v2Opts = try #require(v2["plugin-opts"] as? [String: Any])
+        #expect(v2Opts["version"] as? Int == 2)
+
+        let extracted = ShadowsocksConfigBuilder.extractServers(from: yaml)
+        #expect(extracted == [shadowTLSServerV3, shadowTLSServerV2])
+    }
+
+    @Test(.tags(.ffi))
+    func `engine validates system nameservers and udp-over-tcp`() throws {
+        let yaml = """
+        mixed-port: 7890
+        dns:
+          enable: true
+          default-nameserver:
+            - dhcp://system
+          nameserver:
+            - system
+            - https://1.1.1.1/dns-query
+        proxies:
+          - name: ss-uot
+            type: ss
+            server: 1.2.3.4
+            port: 8388
+            cipher: aes-128-gcm
+            password: test
+            udp-over-tcp: true
+        """
+        try MeowConfigValidator.validate(yaml)
+    }
 }
